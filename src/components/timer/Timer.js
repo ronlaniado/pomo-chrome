@@ -7,7 +7,7 @@ export default class Timer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			currentMin: 52,
+			currentMin: 2,
 			currentSec: 60,
 			timerActive: false,
 			timeSeperator: ":",
@@ -17,81 +17,23 @@ export default class Timer extends React.Component {
 		this.startTimer = this.startTimer.bind(this);
 		this.resetTimer = this.resetTimer.bind(this);
 		this.motivate = this.motivate.bind(this);
-	}
-	componentDidMount() {
-		let currentComponent = this;
-		port.onMessage.addListener(function(msg) {
-			console.log("The port has opened or whatnot");
-			let min = msg.min;
-			let sec = msg.sec;
-			let timeSeperator = msg.timeSeperator;
-			currentComponent.setState({
-				currentMin: min,
-				currentSec: sec,
-				timeSeperator: timeSeperator
-			});
-		});
+		this.refreshDisplay = this.refreshDisplay.bind(this);
+		this.bgpage = chrome.extension.getBackgroundPage();
 	}
 	startTimer() {
-		this.motivate();
+		const currentComponent = this;
 		this.origSec = this.state.currentSec; //The orignal amount of seconds, before the timer started
 		this.origMin = this.state.currentMin; //The original amount of minutes, before the timer started
 		this.setState({
 			timerActive: true
 		});
-		console.log("The button was pressed");
-		let port = chrome.runtime.connect({ name: "timer" });
-		port.postMessage({
-			initTimer: "Start timer",
-			sec: this.state.currentSec,
-			min: this.state.currentMin,
-			timeSeperator: this.state.timeSeperator
-		});
-		// var port = chrome.runtime.connect({ name: "knockknock" });
-		// port.postMessage({ joke: "Knock knock" });
-		// port.onMessage.addListener(function(msg) {
-		// 	if (msg.question == "Who's there?")
-		// 		port.postMessage({ answer: "Madame" });
-		// 	else if (msg.question == "Madame who?")
-		// 		port.postMessage({ answer: "Madame... Bovary" });
-		// });
-		//=====================================================================================================
-		// 	let sec = this.state.currentSec;
-		// 	let min = this.state.currentMin;
-		// 	if (sec > 0) {
-		// 		if (sec < 11) {
-		// 			this.setState(state => ({
-		// 				timeSeperator: ":0"
-		// 			}));
-		// 			this.setState(state => ({
-		// 				currentSec: this.state.currentSec - 1
-		// 			}));
-		// 		} else {
-		// 			if (sec === 60) {
-		// 				//Verifies that if the the time is x:00, the x will first be decremented by 1, since that makes sense in an actual clock
-		// 				this.setState(state => ({
-		// 					currentMin: this.state.currentMin - 1
-		// 				}));
-		// 			}
-		// 			this.setState(state => ({
-		// 				currentSec: this.state.currentSec - 1
-		// 			}));
-		// 		}
-		// 	} else if (min > 0) {
-		// 		this.setState(state => ({
-		// 			currentMin: this.state.currentMin - 1
-		// 		}));
-		// 		this.setState(state => ({
-		// 			currentSec: 59
-		// 		}));
-		// 		this.setState(state => ({
-		// 			timeSeperator: ":"
-		// 		}));
-		// 	}
-		// 	if (min === 0 && sec === 0) {
-		// 		clearInterval(this.timer);
-		// 		this.motivate();
-		// 	}
+		this.bgpage.startTimer(
+			this.state.currentSec,
+			this.state.currentMin,
+			this.state.timeSeperator
+		);
+		this.refreshDisplay();
+		this.motivate();
 	}
 	resetTimer() {
 		clearInterval(this.timer);
@@ -121,6 +63,19 @@ export default class Timer extends React.Component {
 					keepWorking[Math.floor(Math.random() * keepWorking.length)]
 			});
 		}
+	}
+	refreshDisplay() {
+		let localTimer = setInterval(() => {
+			let min = this.bgpage.getMinutes();
+			let sec = this.bgpage.getSeconds();
+			let timeSeperator = this.bgpage.getTimeSeperator();
+			console.log(min + timeSeperator + sec);
+			this.setState({
+				currentMin: min,
+				currentSec: sec,
+				timeSeperator: timeSeperator
+			});
+		}, 1000);
 	}
 	render() {
 		return (
