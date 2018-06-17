@@ -17,8 +17,11 @@ export default class Timer extends React.Component {
 		this.startTimer = this.startTimer.bind(this);
 		this.resetTimer = this.resetTimer.bind(this);
 		this.motivate = this.motivate.bind(this);
-		this.refreshDisplay = this.refreshDisplay.bind(this);
-		this.bgpage = chrome.extension.getBackgroundPage();
+		this.updateTimer = this.updateTimer.bind(this);
+		this.updateTime;
+
+		let origMin = this.state.currentMin;
+		let origSec = this.state.currentSec;
 	}
 	startTimer() {
 		const currentComponent = this;
@@ -27,16 +30,22 @@ export default class Timer extends React.Component {
 		this.setState({
 			timerActive: true
 		});
-		this.bgpage.startTimer(
-			this.state.currentSec,
-			this.state.currentMin,
-			this.state.timeSeperator
-		);
-		this.refreshDisplay();
+		const bgpage = chrome.extension.getBackgroundPage();
+		if (bgpage.getSeconds() > -1) {
+			this.updateTimer();
+		} else {
+			let sec = this.state.currentSec;
+			let min = this.state.currentMin;
+			let timeSeperator = ":";
+			bgpage.startTimer(sec, min, timeSeperator);
+			this.updateTimer();
+		}
 		this.motivate();
 	}
 	resetTimer() {
-		clearInterval(this.timer);
+		let bgpage = chrome.extension.getBackgroundPage();
+		clearInterval(this.updateTime);
+		clearInterval(bgpage.timer);
 		this.setState({
 			timerActive: false,
 			currentMin: this.origMin,
@@ -64,16 +73,22 @@ export default class Timer extends React.Component {
 			});
 		}
 	}
-	refreshDisplay() {
-		let localTimer = setInterval(() => {
-			let min = this.bgpage.getMinutes();
-			let sec = this.bgpage.getSeconds();
-			let timeSeperator = this.bgpage.getTimeSeperator();
-			console.log(min + timeSeperator + sec);
+	updateTimer() {
+		const bgpage = chrome.extension.getBackgroundPage();
+		this.updateTime = setInterval(() => {
+			console.log(
+				bgpage.getMinutes() +
+					bgpage.getTimeSeperator() +
+					bgpage.getSeconds()
+			);
+			let time =
+				bgpage.getMinutes() +
+				bgpage.getTimeSeperator() +
+				bgpage.getSeconds();
 			this.setState({
-				currentMin: min,
-				currentSec: sec,
-				timeSeperator: timeSeperator
+				currentMin: bgpage.getMinutes(),
+				currentSec: bgpage.getSeconds(),
+				timeSeperator: bgpage.getTimeSeperator()
 			});
 		}, 1000);
 	}

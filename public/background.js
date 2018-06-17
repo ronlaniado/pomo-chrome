@@ -1,5 +1,11 @@
+let currentSec;
+let currentMin;
+let currentTimeSeperator;
+let timer;
+
 function startTimer(sec, min, timeSeperator) {
-	const timer = setInterval(() => {
+	timer = setInterval(() => {
+		updateGlobals(sec, min, timeSeperator);
 		console.log(
 			"The background.js page says that the time is: " +
 				min +
@@ -38,11 +44,16 @@ function show() {
 }
 
 function getMinutes() {
-	return min;
+	return currentMin;
 }
 function getSeconds() {
-	return sec;
+	return currentSec;
 }
 function getTimeSeperator() {
-	return timeSeperator;
+	return currentTimeSeperator;
+}
+function updateGlobals(sec, min, timeSeperator) {
+	currentSec = sec;
+	currentMin = min;
+	currentTimeSeperator = timeSeperator;
 }
