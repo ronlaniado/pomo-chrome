@@ -23,6 +23,12 @@ export default class Timer extends React.Component {
 		let origMin = this.state.currentMin;
 		let origSec = this.state.currentSec;
 	}
+	componentWillMount() {
+		const bgpage = chrome.extension.getBackgroundPage();
+		if (bgpage.getSeconds() > -1) {
+			this.updateTimer();
+		}
+	}
 	startTimer() {
 		const currentComponent = this;
 		this.origSec = this.state.currentSec; //The orignal amount of seconds, before the timer started
@@ -31,21 +37,19 @@ export default class Timer extends React.Component {
 			timerActive: true
 		});
 		const bgpage = chrome.extension.getBackgroundPage();
-		if (bgpage.getSeconds() > -1) {
-			this.updateTimer();
-		} else {
-			let sec = this.state.currentSec;
-			let min = this.state.currentMin;
-			let timeSeperator = ":";
-			bgpage.startTimer(sec, min, timeSeperator);
-			this.updateTimer();
-		}
+		let sec = this.state.currentSec;
+		let min = this.state.currentMin;
+		let timeSeperator = ":";
+		bgpage.startTimer(sec, min, timeSeperator);
+		this.updateTimer();
+
 		this.motivate();
 	}
 	resetTimer() {
 		let bgpage = chrome.extension.getBackgroundPage();
+		bgpage.clearTimer();
 		clearInterval(this.updateTime);
-		clearInterval(bgpage.timer);
+		bgpage.resetGlobals(this.origSec, this.origMin, ":");
 		this.setState({
 			timerActive: false,
 			currentMin: this.origMin,

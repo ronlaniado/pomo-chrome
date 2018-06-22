@@ -57,3 +57,11 @@ function updateGlobals(sec, min, timeSeperator) {
 	currentMin = min;
 	currentTimeSeperator = timeSeperator;
 }
+function resetGlobals(sec, min, timeSeperator) {
+	currentSec = sec;
+	currentMin = min;
+	currentTimeSeperator = timeSeperator;
+}
+function clearTimer() {
+	clearInterval(timer);
+}
