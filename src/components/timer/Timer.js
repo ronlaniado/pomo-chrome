@@ -7,8 +7,8 @@ export default class Timer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			currentMin: 2,
-			currentSec: 60,
+			currentMin: 0,
+			currentSec: 10,
 			timerActive: false,
 			timeSeperator: ":",
 			motivationalMessage: "",
@@ -19,9 +19,6 @@ export default class Timer extends React.Component {
 		this.motivate = this.motivate.bind(this);
 		this.updateTimer = this.updateTimer.bind(this);
 		this.updateTime;
-
-		let origMin = this.state.currentMin;
-		let origSec = this.state.currentSec;
 	}
 	componentWillMount() {
 		const bgpage = chrome.extension.getBackgroundPage();
@@ -31,8 +28,6 @@ export default class Timer extends React.Component {
 	}
 	startTimer() {
 		const currentComponent = this;
-		this.origSec = this.state.currentSec; //The orignal amount of seconds, before the timer started
-		this.origMin = this.state.currentMin; //The original amount of minutes, before the timer started
 		this.setState({
 			timerActive: true
 		});
@@ -49,11 +44,11 @@ export default class Timer extends React.Component {
 		let bgpage = chrome.extension.getBackgroundPage();
 		bgpage.clearTimer();
 		clearInterval(this.updateTime);
-		bgpage.resetGlobals(this.origSec, this.origMin, ":");
+		bgpage.resetGlobals();
 		this.setState({
 			timerActive: false,
-			currentMin: this.origMin,
-			currentSec: this.origSec,
+			currentMin: bgpage.getOrigMinutes(),
+			currentSec: bgpage.getOrigSeconds(),
 			timeSeperator: ":"
 		});
 		this.setState({ motivationalMessage: "" });

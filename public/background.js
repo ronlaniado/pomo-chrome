@@ -1,9 +1,13 @@
 let currentSec;
 let currentMin;
 let currentTimeSeperator;
+let origSec;
+let origMin;
 let timer;
 
 function startTimer(sec, min, timeSeperator) {
+	origSec = sec;
+	origMin = min;
 	timer = setInterval(() => {
 		updateGlobals(sec, min, timeSeperator);
 		console.log(
@@ -29,6 +33,7 @@ function startTimer(sec, min, timeSeperator) {
 		}
 		if (min === 0 && sec === 0) {
 			clearInterval(timer);
+			show();
 		}
 	}, 1000);
 }
@@ -57,11 +62,17 @@ function updateGlobals(sec, min, timeSeperator) {
 	currentMin = min;
 	currentTimeSeperator = timeSeperator;
 }
-function resetGlobals(sec, min, timeSeperator) {
-	currentSec = sec;
-	currentMin = min;
-	currentTimeSeperator = timeSeperator;
+function resetGlobals() {
+	currentSec = origSec;
+	currentMin = origMin;
+	currentTimeSeperator = ":";
 }
 function clearTimer() {
 	clearInterval(timer);
+}
+function getOrigMinutes() {
+	return origMin;
+}
+function getOrigSeconds() {
+	return origSec;
 }
