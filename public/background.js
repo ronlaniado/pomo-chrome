@@ -34,6 +34,8 @@ function startTimer(sec, min, timeSeperator) {
 		if (min === 0 && sec === 0) {
 			clearInterval(timer);
 			show();
+			let audio = new Audio("timerDone.wav");
+			audio.play();
 		}
 	}, 1000);
 }

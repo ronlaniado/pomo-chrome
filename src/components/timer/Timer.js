@@ -21,10 +21,7 @@ export default class Timer extends React.Component {
 		this.updateTime;
 	}
 	componentWillMount() {
-		const bgpage = chrome.extension.getBackgroundPage();
-		if (bgpage.getSeconds() > -1) {
-			this.updateTimer();
-		}
+		this.updateTimer();
 	}
 	startTimer() {
 		const currentComponent = this;
@@ -74,22 +71,29 @@ export default class Timer extends React.Component {
 	}
 	updateTimer() {
 		const bgpage = chrome.extension.getBackgroundPage();
-		this.updateTime = setInterval(() => {
-			console.log(
-				bgpage.getMinutes() +
+		bgpage.updateGlobals(
+			this.state.currentSec,
+			this.state.currentTimeSeperator,
+			":"
+		);
+		if (bgpage.getSeconds() > -1) {
+			this.updateTime = setInterval(() => {
+				console.log(
+					bgpage.getMinutes() +
+						bgpage.getTimeSeperator() +
+						bgpage.getSeconds()
+				);
+				let time =
+					bgpage.getMinutes() +
 					bgpage.getTimeSeperator() +
-					bgpage.getSeconds()
-			);
-			let time =
-				bgpage.getMinutes() +
-				bgpage.getTimeSeperator() +
-				bgpage.getSeconds();
-			this.setState({
-				currentMin: bgpage.getMinutes(),
-				currentSec: bgpage.getSeconds(),
-				timeSeperator: bgpage.getTimeSeperator()
-			});
-		}, 1000);
+					bgpage.getSeconds();
+				this.setState({
+					currentMin: bgpage.getMinutes(),
+					currentSec: bgpage.getSeconds(),
+					timeSeperator: bgpage.getTimeSeperator()
+				});
+			}, 1000);
+		}
 	}
 	render() {
 		return (
