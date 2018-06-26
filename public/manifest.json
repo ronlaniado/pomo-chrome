@@ -16,7 +16,7 @@
 	"web_accessible_resources": ["pomo.png"],
 	"background": {
 		"scripts": ["background.js"],
-		"persistent": false
+		"persistent": true
 	},
 	"version": "1.0",
 	"icons": {
