@@ -16,12 +16,20 @@ export default class Timer extends React.Component {
 		};
 		this.startTimer = this.startTimer.bind(this);
 		this.resetTimer = this.resetTimer.bind(this);
-		this.motivate = this.motivate.bind(this);
+		this.motivateBreak = this.motivateBreak.bind(this);
+		this.motivateWork = this.motivateWork.bind(this);
 		this.updateTimer = this.updateTimer.bind(this);
 		this.updateTime;
 	}
 	componentWillMount() {
+		const bgpage = chrome.extension.getBackgroundPage();
 		this.updateTimer();
+		if (bgpage.isActive()) {
+			this.motivateWork();
+			this.setState({ timerActive: true });
+		} else {
+			this.motivateBreak();
+		}
 	}
 	startTimer() {
 		const currentComponent = this;
@@ -34,8 +42,7 @@ export default class Timer extends React.Component {
 		let timeSeperator = ":";
 		bgpage.startTimer(sec, min, timeSeperator);
 		this.updateTimer();
-
-		this.motivate();
+		this.motivateWork();
 	}
 	resetTimer() {
 		let bgpage = chrome.extension.getBackgroundPage();
@@ -50,48 +57,49 @@ export default class Timer extends React.Component {
 		});
 		this.setState({ motivationalMessage: "" });
 	}
-	motivate() {
+	motivateWork() {
 		const keepWorking = [
 			"Keep working, you can do it!",
 			"Almost there!",
 			"Just..a bit..longer.."
 		];
+		this.setState({
+			motivationalMessage:
+				keepWorking[Math.floor(Math.random() * keepWorking.length)]
+		});
+	}
+	motivateBreak() {
 		const takeBreak = ["Take a break, you've earned it!", "Time to relax!"];
-		if (this.state.currentMin === 0 && this.state.currentSec === 0) {
-			this.setState({
-				motivationalMessage:
-					takeBreak[Math.floor(Math.random() * takeBreak.length)]
-			});
-		} else {
-			this.setState({
-				motivationalMessage:
-					keepWorking[Math.floor(Math.random() * keepWorking.length)]
-			});
-		}
+		this.setState({
+			motivationalMessage:
+				takeBreak[Math.floor(Math.random() * takeBreak.length)]
+		});
 	}
 	updateTimer() {
 		const bgpage = chrome.extension.getBackgroundPage();
-		bgpage.updateGlobals(
-			this.state.currentSec,
-			this.state.currentTimeSeperator,
-			":"
-		);
 		if (bgpage.getSeconds() > -1) {
+			this.setState({
+				currentMin: bgpage.getMinutes(),
+				currentSec: bgpage.getSeconds(),
+				timeSeperator: bgpage.getTimeSeperator()
+			});
 			this.updateTime = setInterval(() => {
-				console.log(
-					bgpage.getMinutes() +
-						bgpage.getTimeSeperator() +
-						bgpage.getSeconds()
-				);
-				let time =
-					bgpage.getMinutes() +
-					bgpage.getTimeSeperator() +
-					bgpage.getSeconds();
-				this.setState({
-					currentMin: bgpage.getMinutes(),
-					currentSec: bgpage.getSeconds(),
-					timeSeperator: bgpage.getTimeSeperator()
-				});
+				if (bgpage.getSeconds() > 0) {
+					console.log(
+						bgpage.getMinutes() +
+							bgpage.getTimeSeperator() +
+							bgpage.getSeconds()
+					);
+					this.setState({
+						currentMin: bgpage.getMinutes(),
+						currentSec: bgpage.getSeconds(),
+						timeSeperator: bgpage.getTimeSeperator()
+					});
+				} else {
+					clearInterval(this.updateTime);
+					this.setState({ currentSec: 0 });
+					this.motivateBreak();
+				}
 			}, 1000);
 		}
 	}

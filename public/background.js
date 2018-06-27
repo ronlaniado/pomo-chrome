@@ -6,17 +6,13 @@ let origMin;
 let timer;
 
 function startTimer(sec, min, timeSeperator) {
+	currentSec = sec;
 	origSec = sec;
 	origMin = min;
 	timer = setInterval(() => {
 		updateGlobals(sec, min, timeSeperator);
-		console.log(
-			"The background.js page says that the time is: " +
-				min +
-				timeSeperator +
-				sec
-		);
-		if (sec > 0) {
+		console.log("background.js: " + min + timeSeperator + sec);
+		if (sec >= 0) {
 			if (sec < 11) {
 				timeSeperator = ":0";
 				sec--;
@@ -31,16 +27,15 @@ function startTimer(sec, min, timeSeperator) {
 			sec = 59;
 			timeSeperator = ":";
 		}
-		if (min === 0 && sec === 0) {
+		if (min === 0 && sec < 0) {
 			clearInterval(timer);
-			show();
-			let audio = new Audio("timerDone.wav");
-			audio.play();
+			notifyBreak();
+			audioBreak();
 		}
 	}, 1000);
 }
 
-function show() {
+function notifyBreak() {
 	let time = /(..)(:..)/.exec(new Date()); // The prettyprinted time.
 	let hour = time[1] % 12 || 12; // The prettyprinted hour.
 	let period = time[1] < 12 ? "a.m." : "p.m."; // The period of the day.
@@ -77,4 +72,15 @@ function getOrigMinutes() {
 }
 function getOrigSeconds() {
 	return origSec;
+}
+function isActive() {
+	if (timer) {
+		return true;
+	} else {
+		return false;
+	}
+}
+function audioBreak() {
+	let audio = new Audio("timerDone.wav");
+	audio.play();
 }
