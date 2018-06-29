@@ -18,6 +18,7 @@
 		"scripts": ["background.js"],
 		"persistent": true
 	},
+	"options_page": "options/options.html",
 	"version": "1.0",
 	"icons": {
 		"16": "pomo.png",

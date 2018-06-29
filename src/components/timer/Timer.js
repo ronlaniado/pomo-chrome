@@ -7,7 +7,7 @@ export default class Timer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			currentMin: 0,
+			currentMin: 10,
 			currentSec: 10,
 			timerActive: false,
 			timeSeperator: ":",
@@ -33,10 +33,17 @@ export default class Timer extends React.Component {
 	}
 	startTimer() {
 		const currentComponent = this;
+		const bgpage = chrome.extension.getBackgroundPage();
+		chrome.storage.sync.get(['workTime', 'breakTime'], function(result) {
+			console.log(result.workTime);
+			currentComponent.setState({
+				currentMin: result.workTime
+			})
+
+		});
 		this.setState({
 			timerActive: true
 		});
-		const bgpage = chrome.extension.getBackgroundPage();
 		let sec = this.state.currentSec;
 		let min = this.state.currentMin;
 		let timeSeperator = ":";
