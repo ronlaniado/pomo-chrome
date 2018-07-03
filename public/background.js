@@ -6,12 +6,16 @@ let origMin;
 let timer;
 
 function startTimer(sec, min, timeSeperator) {
-	currentSec = sec;
-	origSec = sec;
-	origMin = min;
+	chrome.storage.sync.get(['workTime'], function(result){
+		origMin = Number(result.workTime);
+		console.log(origMin);
+		origSec = sec;
+		min = origMin;
+	});
 	timer = setInterval(() => {
+		console.log(origMin - 1);
 		updateGlobals(sec, min, timeSeperator);
-		console.log("background.js: " + min + timeSeperator + sec);
+		console.log("background.js: " + currentMin + timeSeperator + currentSec);
 		if (sec >= 0) {
 			if (sec < 11) {
 				timeSeperator = ":0";
@@ -73,6 +77,7 @@ function getOrigMinutes() {
 function getOrigSeconds() {
 	return origSec;
 }
+
 function isActive() {
 	if (timer) {
 		return true;
@@ -81,6 +86,6 @@ function isActive() {
 	}
 }
 function audioBreak() {
-	let audio = new Audio("timerDone.wav");
+	let audio = new Audio("timerDone.wav"); 
 	audio.play();
 }

@@ -34,18 +34,19 @@ export default class Timer extends React.Component {
 	startTimer() {
 		const currentComponent = this;
 		const bgpage = chrome.extension.getBackgroundPage();
-		chrome.storage.sync.get(['workTime', 'breakTime'], function(result) {
-			console.log(result.workTime);
-			currentComponent.setState({
-				currentMin: result.workTime
-			})
-
-		});
+		let min;
+		// chrome.storage.sync.get(['workTime', 'breakTime'], function(result) {
+		// 	console.log(result.workTime);
+		// 	currentComponent.setState({
+		// 		currentMin: Number(result.workTime)
+		// 	});
+		// 	min = Number(result.workTime);
+		// 	console.log(result.workTime + result.breakTime);
+		// });
 		this.setState({
 			timerActive: true
 		});
 		let sec = this.state.currentSec;
-		let min = this.state.currentMin;
 		let timeSeperator = ":";
 		bgpage.startTimer(sec, min, timeSeperator);
 		this.updateTimer();
