@@ -32,23 +32,11 @@ export default class Timer extends React.Component {
 		}
 	}
 	startTimer() {
-		const currentComponent = this;
 		const bgpage = chrome.extension.getBackgroundPage();
-		let min;
-		// chrome.storage.sync.get(['workTime', 'breakTime'], function(result) {
-		// 	console.log(result.workTime);
-		// 	currentComponent.setState({
-		// 		currentMin: Number(result.workTime)
-		// 	});
-		// 	min = Number(result.workTime);
-		// 	console.log(result.workTime + result.breakTime);
-		// });
 		this.setState({
 			timerActive: true
 		});
-		let sec = this.state.currentSec;
-		let timeSeperator = ":";
-		bgpage.startTimer(sec, min, timeSeperator);
+		bgpage.startTimer(this.state.currentSec, this.state.currentMin, this.state.timeSeperator);
 		this.updateTimer();
 		this.motivateWork();
 	}
@@ -105,7 +93,7 @@ export default class Timer extends React.Component {
 					});
 				} else {
 					clearInterval(this.updateTime);
-					this.setState({ currentSec: 0 });
+					this.setState({ currentSec: 0, timerActive: false });
 					this.motivateBreak();
 				}
 			}, 1000);
