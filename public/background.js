@@ -33,6 +33,7 @@ function startTimer(sec, min, timeSeperator) {
 			timeSeperator = ":";
 		}
 		if (min === 0 && sec === 60) {
+			sec = 0;
 			clearInterval(timer);
 			timer = false;
 			notifyBreak();
