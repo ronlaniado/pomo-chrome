@@ -3,23 +3,30 @@ let currentMin;
 let currentTimeSeperator;
 let origSec;
 let origMin;
-let timer;
+let timer = false;
 
 function startTimer(sec, min, timeSeperator) {
-	chrome.storage.sync.get(['workTime'], function(result){
-		origMin = Number(result.workTime);
-		console.log(origMin);
-		origSec = sec;
-		min = origMin;
-	});
+	// chrome.storage.sync.get(['workTime'], function(result){
+	// 	origMin = Number(result.workTime);
+	// 	console.log(origMin);
+	// 	origSec = sec;
+	// 	min = origMin;
+	// });
+	origMin = min;
+	origSec = sec;
 	timer = setInterval(() => {
 		console.log(origMin - 1);
 		updateGlobals(sec, min, timeSeperator);
 		console.log("background.js: " + currentMin + timeSeperator + currentSec);
 		if (sec >= 0) {
 			if (sec < 11) {
-				timeSeperator = ":0";
-				sec--;
+				if (sec === 1) {
+					sec = 60;
+					timeSeperator = ":";
+				} else {
+					timeSeperator = ":0";
+					sec--;
+				}
 			} else {
 				if (sec === 60) {
 					min--;
@@ -33,6 +40,7 @@ function startTimer(sec, min, timeSeperator) {
 		}
 		if (min === 0 && sec < 0) {
 			clearInterval(timer);
+			timer = false;
 			notifyBreak();
 			audioBreak();
 		}
@@ -80,12 +88,16 @@ function getOrigSeconds() {
 
 function isActive() {
 	if (timer) {
+		console.log(timer);
 		return true;
 	} else {
 		return false;
 	}
 }
+function isActiveFalse() {
+	timer = false;
+}
 function audioBreak() {
-	let audio = new Audio("timerDone.wav"); 
+	let audio = new Audio("timerDone.wav");
 	audio.play();
 }

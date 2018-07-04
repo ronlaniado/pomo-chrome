@@ -8,7 +8,7 @@ export default class Timer extends React.Component {
 		super(props);
 		this.state = {
 			currentMin: 10,
-			currentSec: 10,
+			currentSec: 60,
 			timerActive: false,
 			timeSeperator: ":",
 			motivationalMessage: "",
@@ -23,12 +23,20 @@ export default class Timer extends React.Component {
 	}
 	componentWillMount() {
 		const bgpage = chrome.extension.getBackgroundPage();
+		const prosteticThis = this;
 		this.updateTimer();
 		if (bgpage.isActive()) {
 			this.motivateWork();
 			this.setState({ timerActive: true });
 		} else {
+			chrome.storage.sync.get(['workTime'], function(result){
+				prosteticThis.setState({
+					currentMin: Number(result.workTime)
+				})
+				console.log(this.state.currentMin);
+			});
 			this.motivateBreak();
+			this.setState({timerActive: false});
 		}
 	}
 	startTimer() {
@@ -44,6 +52,7 @@ export default class Timer extends React.Component {
 		let bgpage = chrome.extension.getBackgroundPage();
 		bgpage.clearTimer();
 		clearInterval(this.updateTime);
+		bgpage.isActiveFalse();
 		bgpage.resetGlobals();
 		this.setState({
 			timerActive: false,
@@ -73,7 +82,7 @@ export default class Timer extends React.Component {
 	}
 	updateTimer() {
 		const bgpage = chrome.extension.getBackgroundPage();
-		if (bgpage.getSeconds() > -1) {
+		if (bgpage.isActive()) {
 			this.setState({
 				currentMin: bgpage.getMinutes(),
 				currentSec: bgpage.getSeconds(),
