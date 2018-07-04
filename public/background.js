@@ -6,19 +6,13 @@ let origMin;
 let timer = false;
 
 function startTimer(sec, min, timeSeperator) {
-	// chrome.storage.sync.get(['workTime'], function(result){
-	// 	origMin = Number(result.workTime);
-	// 	console.log(origMin);
-	// 	origSec = sec;
-	// 	min = origMin;
-	// });
 	origMin = min;
 	origSec = sec;
 	timer = setInterval(() => {
 		console.log(origMin - 1);
 		updateGlobals(sec, min, timeSeperator);
 		console.log("background.js: " + currentMin + timeSeperator + currentSec);
-		if (sec >= 0) {
+		if (sec >= 0 && sec != 60) {
 			if (sec < 11) {
 				if (sec === 1) {
 					sec = 60;
@@ -38,7 +32,7 @@ function startTimer(sec, min, timeSeperator) {
 			sec = 59;
 			timeSeperator = ":";
 		}
-		if (min === 0 && sec < 0) {
+		if (min === 0 && sec === 60) {
 			clearInterval(timer);
 			timer = false;
 			notifyBreak();
