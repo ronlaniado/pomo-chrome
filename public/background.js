@@ -16,9 +16,7 @@ function startTimer(sec, min, timeSeperator) {
 			if (sec < 11) {
 				if (sec === 1) {
 					sec = 60;
-					timeSeperator = ":";
 				} else {
-					timeSeperator = ":0";
 					sec--;
 				}
 			} else {
@@ -30,10 +28,8 @@ function startTimer(sec, min, timeSeperator) {
 		} else if (min > 0) {
 			min--;
 			sec = 59;
-			timeSeperator = ":";
 		}
 		if (min === 0 && sec === 60) {
-			sec = 0;
 			clearInterval(timer);
 			timer = false;
 			notifyBreak();
@@ -91,6 +87,9 @@ function isActive() {
 }
 function isActiveFalse() {
 	timer = false;
+}
+function isActiveTrue() {
+	timer = true;
 }
 function audioBreak() {
 	let audio = new Audio("timerDone.wav");

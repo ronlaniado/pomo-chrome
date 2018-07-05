@@ -21,19 +21,21 @@ export default class Timer extends React.Component {
 		this.updateTimer = this.updateTimer.bind(this);
 		this.updateTime;
 	}
+	
 	componentWillMount() {
 		const bgpage = chrome.extension.getBackgroundPage();
-		const prosteticThis = this;
+		const prostheticThis = this;
 		this.updateTimer();
 		if (bgpage.isActive()) {
 			this.motivateWork();
 			this.setState({ timerActive: true });
 		} else {
-			chrome.storage.sync.get(['workTime'], function(result){
-				prosteticThis.setState({
-					currentMin: Number(result.workTime)
-				})
-				console.log(this.state.currentMin);
+			//Uses Chrome's Storage API to get the options put in by the users
+			chrome.storage.sync.get(['workTimeMins', 'workTimeSecs'], function(result){
+				prostheticThis.setState({
+					currentMin: Number(result.workTimeMins),
+					currentSec: Number(result.workTimeSecs)
+				});
 			});
 			this.motivateBreak();
 			this.setState({timerActive: false});
@@ -44,7 +46,9 @@ export default class Timer extends React.Component {
 		this.setState({
 			timerActive: true
 		});
+		//Starts the timer function in the background.js file, and inputs all current values as variables.
 		bgpage.startTimer(this.state.currentSec, this.state.currentMin, this.state.timeSeperator);
+		bgpage.isActiveTrue();
 		this.updateTimer();
 		this.motivateWork();
 	}
@@ -109,14 +113,21 @@ export default class Timer extends React.Component {
 		}
 	}
 	render() {
+		let seconds;
+		//Determines proper formatting for time in seconds
+		if (this.state.currentSec === 60) {
+			seconds = '00';
+		} else if (this.state.currentSec < 10) {
+			seconds = '0' + this.state.currentSec;
+		} else {
+			seconds = this.state.currentSec;
+		}
 		return (
 			<div className="timer">
 				<h2 className="is-centered">
 					{this.state.currentMin}
 					{this.state.timeSeperator}
-					{this.state.currentSec === 60
-						? "00"
-						: this.state.currentSec}
+					{seconds}
 				</h2>
 				<div className="buttons is-centered">
 					<button
