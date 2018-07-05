@@ -105,9 +105,10 @@ export default class Timer extends React.Component {
 						timeSeperator: bgpage.getTimeSeperator()
 					});
 				} else {
-					clearInterval(this.updateTime);
 					this.setState({ currentSec: 0, timerActive: false });
+					this.resetTimer();
 					this.motivateBreak();
+
 				}
 			}, 1000);
 		}
@@ -128,6 +129,7 @@ export default class Timer extends React.Component {
 					{this.state.currentMin}
 					{this.state.timeSeperator}
 					{seconds}
+					
 				</h2>
 				<div className="buttons is-centered">
 					<button
