@@ -29,6 +29,7 @@ function startTimer(sec, min, timeSeperator) {
 			sec = 59;
 		}
 		if (min === 0 && sec === 60) {
+			console.log("The timer will end now...");
 			clearInterval(timer);
 			timer = false;
 			notifyBreak();

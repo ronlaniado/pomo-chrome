@@ -7,6 +7,8 @@ export default class Timer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			origMin: 0,
+			origSec: 0,
 			currentMin: 10,
 			currentSec: 60,
 			timerActive: false,
@@ -33,8 +35,10 @@ export default class Timer extends React.Component {
 			//Uses Chrome's Storage API to get the options put in by the users
 			chrome.storage.sync.get(['workTimeMins', 'workTimeSecs'], function(result){
 				prostheticThis.setState({
-					currentMin: Number(result.workTimeMins),
-					currentSec: Number(result.workTimeSecs)
+					origMin: Number(result.workTimeMins),
+					origSec: Number(result.workTimeSecs),
+					currentMin: this.state.origMin,
+					currentSec: this.state.origSec
 				});
 			});
 			this.motivateBreak();
@@ -44,13 +48,16 @@ export default class Timer extends React.Component {
 	startTimer() {
 		const bgpage = chrome.extension.getBackgroundPage();
 		this.setState({
+			currentMin: this.state.origMin,
+			currentSec: this.state.origSec,
 			timerActive: true
 		});
-		//Starts the timer function in the background.js file, and inputs all current values as variables.
-		bgpage.startTimer(this.state.currentSec, this.state.currentMin, this.state.timeSeperator);
+ 		//Starts the timer function in the background.js file, and inputs all current values as variables.
+		bgpage.startTimer(this.state.origSec, this.state.origMin, this.state.timeSeperator);
 		bgpage.isActiveTrue();
 		this.updateTimer();
 		this.motivateWork();
+
 	}
 	resetTimer() {
 		let bgpage = chrome.extension.getBackgroundPage();
@@ -72,17 +79,11 @@ export default class Timer extends React.Component {
 			"Almost there!",
 			"Just..a bit..longer.."
 		];
-		this.setState({
-			motivationalMessage:
-				keepWorking[Math.floor(Math.random() * keepWorking.length)]
-		});
+		this.setState({motivationalMessage:keepWorking[Math.floor(Math.random() * keepWorking.length)]});
 	}
 	motivateBreak() {
 		const takeBreak = ["Take a break, you've earned it!", "Time to relax!"];
-		this.setState({
-			motivationalMessage:
-				takeBreak[Math.floor(Math.random() * takeBreak.length)]
-		});
+		this.setState({motivationalMessage:takeBreak[Math.floor(Math.random() * takeBreak.length)]});
 	}
 	updateTimer() {
 		const bgpage = chrome.extension.getBackgroundPage();
