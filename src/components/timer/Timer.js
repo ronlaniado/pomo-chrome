@@ -93,22 +93,26 @@ export default class Timer extends React.Component {
 				timeSeperator: bgpage.getTimeSeperator()
 			});
 			this.updateTime = setInterval(() => {
-				if (bgpage.getSeconds() > 0) {
-					console.log(
-						bgpage.getMinutes() +
-							bgpage.getTimeSeperator() +
-							bgpage.getSeconds()
-					);
-					this.setState({
-						currentMin: bgpage.getMinutes(),
-						currentSec: bgpage.getSeconds(),
-						timeSeperator: bgpage.getTimeSeperator()
-					});
-				} else {
-					this.setState({ currentSec: 0, timerActive: false });
-					this.resetTimer();
-					this.motivateBreak();
-
+				if (bgpage.getSeconds() >= 1) {
+					if (bgpage.getSeconds() === 1) {
+						this.setState({
+							currentMin: 0,
+							currentSec: 1
+						});
+						setTimeout(() => {
+							this.setState({currentSec: 0});
+							clearInterval(this.updateTime);
+							this.motivateBreak();
+						}, 1000);
+						setTimeout(() => {this.resetTimer()}, 5000);
+					} else {
+						console.log(bgpage.getMinutes() + bgpage.getTimeSeperator() + bgpage.getSeconds());
+						this.setState({
+							currentMin: bgpage.getMinutes(),
+							currentSec: bgpage.getSeconds(),
+							timeSeperator: bgpage.getTimeSeperator()
+						});
+					}
 				}
 			}, 1000);
 		}

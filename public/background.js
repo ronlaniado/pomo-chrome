@@ -9,7 +9,6 @@ function startTimer(sec, min, timeSeperator) {
 	origMin = min;
 	origSec = sec;
 	timer = setInterval(() => {
-		console.log(origMin - 1);
 		updateGlobals(sec, min, timeSeperator);
 		console.log("background.js: " + currentMin + timeSeperator + currentSec);
 		if (sec >= 0 && sec != 60) {
