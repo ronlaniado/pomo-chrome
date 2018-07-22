@@ -32,14 +32,25 @@ export default class Timer extends React.Component {
 			this.motivateWork();
 			this.setState({ timerActive: true });
 		} else {
-			//Uses Chrome's Storage API to get the options put in by the users
-			chrome.storage.sync.get(['workTimeMins', 'workTimeSecs'], function(result){
-				prostheticThis.setState({
-					origMin: Number(result.workTimeMins),
-					origSec: Number(result.workTimeSecs),
-					currentMin: this.state.origMin,
-					currentSec: this.state.origSec
-				});
+			//Uses Chrome's Storage API to get the timer options inputting by the users
+			chrome.storage.sync.get(['workTimeMins', 'workTimeSecs'], function (result) {
+				//Checks if users put in any values. If they didn't, it uses default values. 
+				if (result.workTimeMins === undefined || result.workTimeSecs === undefined) {
+					console.log(result.workTimeMins);
+					prostheticThis.setState({
+						origMin: 52,
+						origSec: 60,
+						currentMin: this.state.origMin,
+						currentSec: this.state.origSec
+					});
+				} else {
+					prostheticThis.setState({
+						origMin: Number(result.workTimeMins),
+						origSec: Number(result.workTimeSecs),
+						currentMin: this.state.origMin,
+						currentSec: this.state.origSec
+					});
+				}
 			});
 			this.motivateBreak();
 			this.setState({timerActive: false});
