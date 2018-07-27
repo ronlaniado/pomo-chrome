@@ -23,12 +23,12 @@ export default class Timer extends React.Component {
 		this.updateTimer = this.updateTimer.bind(this);
 		this.updateTime;
 	}
-	
 	componentWillMount() {
 		const bgpage = chrome.extension.getBackgroundPage();
 		const prostheticThis = this;
 		this.updateTimer();
 		if (bgpage.isActive()) {
+			console.log("The background page is currently active");
 			this.motivateWork();
 			this.setState({ timerActive: true });
 		} else {
@@ -40,15 +40,15 @@ export default class Timer extends React.Component {
 					prostheticThis.setState({
 						origMin: 52,
 						origSec: 60,
-						currentMin: this.state.origMin,
-						currentSec: this.state.origSec
+						currentMin: prostheticThis.state.origMin,
+						currentSec: prostheticThis.state.origSec
 					});
 				} else {
 					prostheticThis.setState({
 						origMin: Number(result.workTimeMins),
 						origSec: Number(result.workTimeSecs),
-						currentMin: this.state.origMin,
-						currentSec: this.state.origSec
+						currentMin: Number(result.workTimeMins),
+						currentSec: Number(result.workTimeSecs)
 					});
 				}
 			});
@@ -78,8 +78,8 @@ export default class Timer extends React.Component {
 		bgpage.resetGlobals();
 		this.setState({
 			timerActive: false,
-			currentMin: bgpage.getOrigMinutes(),
-			currentSec: bgpage.getOrigSeconds(),
+			currentMin: this.state.origMin,
+			currentSec: this.state.origSec,
 			timeSeperator: ":"
 		});
 		this.setState({ motivationalMessage: "" });
@@ -107,13 +107,13 @@ export default class Timer extends React.Component {
 			this.updateTime = setInterval(() => {
 				if (bgpage.getSeconds() >= 1) {
 					if (bgpage.getSeconds() === 1) {
+						clearInterval(this.updateTime);
 						this.setState({
 							currentMin: 0,
 							currentSec: 1
 						});
 						setTimeout(() => {
 							this.setState({currentSec: 0});
-							clearInterval(this.updateTime);
 							this.motivateBreak();
 						}, 1000);
 						setTimeout(() => {this.resetTimer()}, 5000);

@@ -11,7 +11,13 @@ function startTimer(sec, min, timeSeperator) {
 	timer = setInterval(() => {
 		updateGlobals(sec, min, timeSeperator);
 		console.log("background.js: " + currentMin + timeSeperator + currentSec);
-		if (sec >= 0 && sec != 60) {
+		if (currentMin === 0 && currentSec === 60) {
+			console.log("The timer will end now...");
+			timer = false;
+			notifyBreak();
+			audioBreak();
+			clearInterval(timer);
+		} else if (sec >= 0 && sec != 60) {
 			if (sec < 11) {
 				if (sec === 1) {
 					sec = 60;
@@ -27,13 +33,6 @@ function startTimer(sec, min, timeSeperator) {
 		} else if (min > 0) {
 			min--;
 			sec = 59;
-		}
-		if (min === 0 && sec === 60) {
-			console.log("The timer will end now...");
-			clearInterval(timer);
-			timer = false;
-			notifyBreak();
-			audioBreak();
 		}
 	}, 1000);
 }
