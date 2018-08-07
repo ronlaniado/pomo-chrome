@@ -16,7 +16,10 @@ function startTimer(sec, min, timeSeperator) {
 			timer = false;
 			notifyBreak();
 			audioBreak();
+			sec = -1;
+			min = -1;
 			clearInterval(timer);
+			
 		} else if (sec >= 0 && sec != 60) {
 			if (sec < 11) {
 				if (sec === 1) {
