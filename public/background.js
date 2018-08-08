@@ -3,23 +3,24 @@ let currentMin;
 let currentTimeSeperator;
 let origSec;
 let origMin;
-let timer = false;
+let timerStatus = false;
+let timer;
 
 function startTimer(sec, min, timeSeperator) {
 	origMin = min;
 	origSec = sec;
 	timer = setInterval(() => {
+		timerStatus = true;
 		updateGlobals(sec, min, timeSeperator);
 		console.log("background.js: " + currentMin + timeSeperator + currentSec);
 		if (currentMin === 0 && currentSec === 60) {
 			console.log("The timer will end now...");
-			timer = false;
 			notifyBreak();
 			audioBreak();
 			sec = -1;
 			min = -1;
+			timerStatus = false;
 			clearInterval(timer);
-			
 		} else if (sec >= 0 && sec != 60) {
 			if (sec < 11) {
 				if (sec === 1) {
@@ -36,6 +37,9 @@ function startTimer(sec, min, timeSeperator) {
 		} else if (min > 0) {
 			min--;
 			sec = 59;
+		} else {
+			clearInterval(timer);
+			timerStatus = false;
 		}
 	}, 1000);
 }
@@ -80,7 +84,7 @@ function getOrigSeconds() {
 }
 
 function isActive() {
-	if (timer) {
+	if (timerStatus) {
 		console.log(timer);
 		return true;
 	} else {
@@ -88,10 +92,10 @@ function isActive() {
 	}
 }
 function isActiveFalse() {
-	timer = false;
+	timerStatus = false;
 }
 function isActiveTrue() {
-	timer = true;
+	timerStatus = true;
 }
 function audioBreak() {
 	let audio = new Audio("timerDone.wav");

@@ -80,16 +80,13 @@ export default class Timer extends React.Component {
 			timerActive: false,
 			currentMin: this.state.origMin,
 			currentSec: this.state.origSec,
-			timeSeperator: ":"
+			timeSeperator: ":",
+			motivationalMessage: ""
 		});
-		this.setState({ motivationalMessage: "" });
 	}
 	motivateWork() {
 		const keepWorking = [
-			"Keep working, you can do it!",
-			"Almost there!",
-			"Just..a bit..longer.."
-		];
+			"Keep working, you can do it!", "Almost there!", "Just..a bit..longer.."];
 		this.setState({motivationalMessage:keepWorking[Math.floor(Math.random() * keepWorking.length)]});
 	}
 	motivateBreak() {
