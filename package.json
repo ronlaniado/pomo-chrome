@@ -9,6 +9,7 @@
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-scripts": "1.1.4",
+    "react-spinners": "^0.3.3",
     "reactbulma": "^3.0.4",
     "yarn": "^1.7.0"
   },

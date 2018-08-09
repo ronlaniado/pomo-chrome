@@ -52,23 +52,16 @@ export default class Timer extends React.Component {
 					});
 				}
 			});
-			this.motivateBreak();
 			this.setState({timerActive: false});
 		}
 	}
 	startTimer() {
 		const bgpage = chrome.extension.getBackgroundPage();
-		this.setState({
-			currentMin: this.state.origMin,
-			currentSec: this.state.origSec,
-			timerActive: true
-		});
  		//Starts the timer function in the background.js file, and inputs all current values as variables.
 		bgpage.startTimer(this.state.origSec, this.state.origMin, this.state.timeSeperator);
 		bgpage.isActiveTrue();
 		this.updateTimer();
 		this.motivateWork();
-
 	}
 	resetTimer() {
 		let bgpage = chrome.extension.getBackgroundPage();
@@ -96,11 +89,6 @@ export default class Timer extends React.Component {
 	updateTimer() {
 		const bgpage = chrome.extension.getBackgroundPage();
 		if (bgpage.isActive()) {
-			this.setState({
-				currentMin: bgpage.getMinutes(),
-				currentSec: bgpage.getSeconds(),
-				timeSeperator: bgpage.getTimeSeperator()
-			});
 			this.updateTime = setInterval(() => {
 				if (bgpage.getSeconds() >= 1) {
 					if (bgpage.getSeconds() === 1) {
@@ -142,7 +130,6 @@ export default class Timer extends React.Component {
 					{this.state.currentMin}
 					{this.state.timeSeperator}
 					{seconds}
-					
 				</h2>
 				<div className="buttons is-centered">
 					<button

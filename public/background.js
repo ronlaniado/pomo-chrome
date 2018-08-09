@@ -23,7 +23,7 @@ function startTimer(sec, min, timeSeperator) {
 			clearInterval(timer);
 		} else if (sec >= 0 && sec != 60) {
 			if (sec < 11) {
-				if (sec === 1) {
+				if (sec <= 1) {
 					sec = 60;
 				} else {
 					sec--;
