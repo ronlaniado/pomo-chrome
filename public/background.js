@@ -12,11 +12,10 @@ function startTimer(sec, min, timeSeperator) {
 	timer = setInterval(() => {
 		timerStatus = true;
 		updateGlobals(sec, min, timeSeperator);
-		console.log("background.js: " + currentMin + timeSeperator + currentSec);
+		console.log('background.js: ' + currentMin + timeSeperator + currentSec);
 		if (currentMin === 0 && currentSec === 60) {
-			console.log("The timer will end now...");
+			console.log('The timer will end now...');
 			notifyBreak();
-			audioBreak();
 			sec = -1;
 			min = -1;
 			timerStatus = false;
@@ -47,11 +46,13 @@ function startTimer(sec, min, timeSeperator) {
 function notifyBreak() {
 	let time = /(..)(:..)/.exec(new Date()); // The prettyprinted time.
 	let hour = time[1] % 12 || 12; // The prettyprinted hour.
-	let period = time[1] < 12 ? "a.m." : "p.m."; // The period of the day.
-	new Notification(hour + time[2] + " " + period, {
-		icon: "pomo.png",
+	let period = time[1] < 12 ? 'a.m.' : 'p.m.'; // The period of the day.
+	new Notification(hour + time[2] + ' ' + period, {
+		icon: 'pomo.png',
 		body: "It's time to take a break! You did it!"
 	});
+	let audio = new Audio('timerDone.wav');
+	audio.play();
 }
 
 function getMinutes() {
@@ -71,7 +72,7 @@ function updateGlobals(sec, min, timeSeperator) {
 function resetGlobals() {
 	currentSec = origSec;
 	currentMin = origMin;
-	currentTimeSeperator = ":";
+	currentTimeSeperator = ':';
 }
 function clearTimer() {
 	clearInterval(timer);
@@ -96,8 +97,4 @@ function isActiveFalse() {
 }
 function isActiveTrue() {
 	timerStatus = true;
-}
-function audioBreak() {
-	let audio = new Audio("timerDone.wav");
-	audio.play();
 }
