@@ -8,6 +8,7 @@ export default class Timer extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			status: '',
 			origMin: 0,
 			origSec: 0,
 			currentMin: 0,
@@ -16,6 +17,14 @@ export default class Timer extends React.Component {
 			timeSeperator: ':',
 			motivationalMessage: '',
 			disabled: '' //This sets the Start Timer button to be disabled
+		};
+		this.workStyle = {
+			fontSize: '12px',
+			color: '#e20c0c'
+		};
+		this.breakStyle = {
+			fontSize: '12px',
+			color: '#63d824'
 		};
 		this.startTimer = this.startTimer.bind(this);
 		this.resetTimer = this.resetTimer.bind(this);
@@ -29,11 +38,13 @@ export default class Timer extends React.Component {
 		//ProstheticThis serves as a way to specify the meaning of `this` inside of the chrome.storage.sync function
 		const prostheticThis = this;
 		if (bgpage.isActive()) {
+			//Updates the current timer so that the popup is always up-to-date with the background script
 			console.log('The background page is currently active');
 			this.setState({
 				currentMin: bgpage.getMinutes(),
 				currentSec: bgpage.getSeconds(),
-				timeSeperator: bgpage.getTimeSeperator()
+				timeSeperator: bgpage.getTimeSeperator(),
+				status: `WORK TIME`
 			});
 			this.updateTimer();
 			this.motivateWork();
@@ -67,7 +78,7 @@ export default class Timer extends React.Component {
 		const bgpage = chrome.extension.getBackgroundPage();
 		let localSec = this.state.origSec;
 		let localMin = this.state.origMin;
-		//Because the updateTimer function has a 1 second delay, the timer will start a second behind. This code is to ensure that the timer is 
+		//Because the updateTimer function has a 1 second delay, the timer will start a second behind. This code is to ensure that the timer is
 		if (localSec > 0) {
 			localSec--;
 		} else if (localMin > 0) {
@@ -79,6 +90,7 @@ export default class Timer extends React.Component {
 		bgpage.isActiveTrue();
 		this.updateTimer();
 		this.motivateWork();
+		this.setState({ status: 'WORK TIME', timerActive: true });
 	}
 	resetTimer() {
 		let bgpage = chrome.extension.getBackgroundPage();
@@ -91,7 +103,8 @@ export default class Timer extends React.Component {
 			currentMin: this.state.origMin,
 			currentSec: this.state.origSec,
 			timeSeperator: ':',
-			motivationalMessage: ''
+			motivationalMessage: '',
+			status: ''
 		});
 	}
 	motivateWork() {
@@ -113,6 +126,7 @@ export default class Timer extends React.Component {
 						currentMin: 0,
 						currentSec: 1
 					});
+					this.setState({ status: 'BREAK TIME' });
 					setTimeout(() => {
 						this.setState({ currentSec: 0 });
 						this.motivateBreak();
@@ -145,6 +159,12 @@ export default class Timer extends React.Component {
 			<div className="timer">
 				<React.StrictMode>
 					<h2 className="is-centered">
+						<p
+							className="is=successs title"
+							style={this.state.status === `WORK TIME` ? this.workStyle : this.breakStyle}
+						>
+							{this.state.status}
+						</p>
 						{this.state.currentMin}
 						{this.state.timeSeperator}
 						{seconds}
@@ -157,10 +177,14 @@ export default class Timer extends React.Component {
 						>
 							Start timer
 						</button>
-						<button className="is-expanded button is-danger reset_timer" onClick={this.resetTimer}>
+						<button
+							className="is-expanded button is-danger reset_timer"
+							onClick={this.resetTimer}
+							disabled={!(this.state.timerActive)}
+						>
 							Reset timer
 						</button>
-						<h5 className="timer_status">{this.state.motivationalMessage}</h5>
+						<h5>{this.state.motivationalMessage}</h5>
 					</div>
 				</React.StrictMode>
 			</div>

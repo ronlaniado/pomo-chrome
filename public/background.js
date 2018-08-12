@@ -47,13 +47,22 @@ function notifyBreak() {
 	let time = /(..)(:..)/.exec(new Date()); // The prettyprinted time.
 	let hour = time[1] % 12 || 12; // The prettyprinted hour.
 	let period = time[1] < 12 ? 'a.m.' : 'p.m.'; // The period of the day.
-	new Notification(hour + time[2] + ' ' + period, {
+	new Notification(hour + time[2] + ' ' + period, {	//Uses the built-in notification's API
 		icon: 'pomo.png',
 		body: "It's time to take a break! You did it!"
 	});
 	let audio = new Audio('timerDone.wav');
 	audio.play();
 }
+
+/*
+------------------------------------
+Opens the options page on install
+------------------------------------
+chrome.runtime.onInstalled.addListener(function () {
+	chrome.runtime.openOptionsPage();
+});
+*/
 
 function getMinutes() {
 	return currentMin;
