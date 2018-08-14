@@ -1,7 +1,6 @@
 /*global chrome*/
 import React from 'react';
 import Bulma from 'reactbulma';
-import { RingLoader } from 'react-spinners';
 import './timer.css';
 
 export default class Timer extends React.Component {
@@ -9,14 +8,18 @@ export default class Timer extends React.Component {
 		super(props);
 		this.state = {
 			status: '',
-			origMin: 0,
-			origSec: 0,
-			currentMin: 0,
-			currentSec: 0,
+			origWorkMins: 0,
+			origWorkSecs: 0,
+			origBreakMins: 0,
+			origBreakSecs: 0,
+			currentWorkMins: 0,
+			currentWorkSecs: 0,
+			currentBreakMins: 0,
+			currentBreakSecs: 0,
 			timerActive: false,
 			timeSeperator: ':',
 			motivationalMessage: '',
-			disabled: '' //This sets the Start Timer button to be disabled
+			disabled: '' //This sets the Start/Reset Timer button to be disabled when the other is enabled
 		};
 		this.workStyle = {
 			fontSize: '12px',
@@ -41,8 +44,8 @@ export default class Timer extends React.Component {
 			//Updates the current timer so that the popup is always up-to-date with the background script
 			console.log('The background page is currently active');
 			this.setState({
-				currentMin: bgpage.getMinutes(),
-				currentSec: bgpage.getSeconds(),
+				currentWorkMins: bgpage.getMinutes(),
+				currentWorkSecs: bgpage.getSeconds(),
 				timeSeperator: bgpage.getTimeSeperator(),
 				status: `WORK TIME`
 			});
@@ -52,23 +55,30 @@ export default class Timer extends React.Component {
 		} else {
 			console.log('The timer is currently inactive.');
 			//Uses Chrome's Storage API to get the timer options inputting by the users
-			chrome.storage.sync.get([ 'workTimeMins', 'workTimeSecs' ], function(result) {
+			chrome.storage.sync.get([ 'workTimeMins', 'workTimeSecs', 'breakTimeMins', 'breakTimeSecs' ], function(
+				result
+			) {
 				//Checks if users put in any values. If they didn't, it uses default values.
 				if (result.workTimeMins === undefined || result.workTimeSecs === undefined) {
+					//Uses default values in case the options page has nothing inputted
 					console.log(result.workTimeMins);
 					prostheticThis.setState({
-						origMin: 52,
-						origSec: 60,
-						currentMin: prostheticThis.state.origMin,
-						currentSec: prostheticThis.state.origSec
+						origWorkMins: 52,
+						origWorkSecs: 60,
+						currentWorkMins: prostheticThis.state.origWorkMins,
+						currentWorkSecs: prostheticThis.state.origWorkSecs
 					});
 				} else {
+					//Gets the options that the user inputted into the state of the timer
 					prostheticThis.setState({
-						origMin: Number(result.workTimeMins),
-						origSec: Number(result.workTimeSecs),
-						currentMin: Number(result.workTimeMins),
-						currentSec: Number(result.workTimeSecs)
+						origWorkMins: Number(result.workTimeMins),
+						origWorkSecs: Number(result.workTimeSecs),
+						currentWorkMins: Number(result.workTimeMins),
+						currentWorkSecs: Number(result.workTimeSecs),
+						currentBreakMins: Number(result.breakTimeMins),
+						currentBreakSecs: Number(result.breakTimeSecs)
 					});
+					console.log(this.state.currentBreakMins + ':' + this.state.currentBreakSecs);
 				}
 			});
 			this.setState({ timerActive: false });
@@ -76,8 +86,8 @@ export default class Timer extends React.Component {
 	}
 	startTimer() {
 		const bgpage = chrome.extension.getBackgroundPage();
-		let localSec = this.state.origSec;
-		let localMin = this.state.origMin;
+		let localSec = this.state.origWorkSecs;
+		let localMin = this.state.origWorkMins;
 		//Because the updateTimer function has a 1 second delay, the timer will start a second behind. This code is to ensure that the timer is
 		if (localSec > 0) {
 			localSec--;
@@ -100,8 +110,8 @@ export default class Timer extends React.Component {
 		bgpage.resetGlobals();
 		this.setState({
 			timerActive: false,
-			currentMin: this.state.origMin,
-			currentSec: this.state.origSec,
+			currentWorkMins: this.state.origWorkMins,
+			currentWorkSecs: this.state.origWorkSecs,
 			timeSeperator: ':',
 			motivationalMessage: '',
 			status: ''
@@ -123,12 +133,12 @@ export default class Timer extends React.Component {
 				if (bgpage.getSeconds() === 1 && bgpage.getMinutes() === 0) {
 					clearInterval(this.updateTime);
 					this.setState({
-						currentMin: 0,
-						currentSec: 1
+						currentWorkMins: 0,
+						currentWorkSecs: 1
 					});
 					this.setState({ status: 'BREAK TIME' });
 					setTimeout(() => {
-						this.setState({ currentSec: 0 });
+						this.setState({ currentWorkSecs: 0 });
 						this.motivateBreak();
 					}, 1000);
 					setTimeout(() => {
@@ -137,8 +147,8 @@ export default class Timer extends React.Component {
 				} else {
 					console.log(bgpage.getMinutes() + bgpage.getTimeSeperator() + bgpage.getSeconds());
 					this.setState({
-						currentMin: bgpage.getMinutes(),
-						currentSec: bgpage.getSeconds(),
+						currentWorkMins: bgpage.getMinutes(),
+						currentWorkSecs: bgpage.getSeconds(),
 						timeSeperator: bgpage.getTimeSeperator()
 					});
 				}
@@ -146,14 +156,22 @@ export default class Timer extends React.Component {
 		}
 	}
 	render() {
-		let seconds;
+		let workSeconds;
 		//Determines proper formatting for time in seconds
-		if (this.state.currentSec === 60) {
-			seconds = '00';
-		} else if (this.state.currentSec < 10) {
-			seconds = '0' + this.state.currentSec;
+		if (this.state.currentWorkSecs === 60) {
+			workSeconds = '00';
+		} else if (this.state.currentWorkSecs < 10) {
+			workSeconds = '0' + this.state.currentWorkSecs;
 		} else {
-			seconds = this.state.currentSec;
+			workSeconds = this.state.currentWorkSecs;
+		}
+		let breakSeconds;
+		if (this.state.currentBreakSecs === 60) {
+			breakSeconds == '00';
+		} else if (this.state.currentBreakSecs < 10) {
+			breakSeconds = '0' + this.state.currentBreakSecs;
+		} else {
+			breakSeconds = this.state.currentBreakSecs;
 		}
 		return (
 			<div className="timer">
@@ -165,11 +183,11 @@ export default class Timer extends React.Component {
 						>
 							{this.state.status}
 						</p>
-						{this.state.currentMin}
+						{this.state.currentWorkMins}
 						{this.state.timeSeperator}
-						{seconds}
+						{workSeconds}
 					</h2>
-					<div className="buttons is-centered">
+					<div className="buttons is-centered is-marginless">
 						<button
 							className="is-expanded button is-success start_timer"
 							onClick={this.startTimer}
@@ -180,11 +198,14 @@ export default class Timer extends React.Component {
 						<button
 							className="is-expanded button is-danger reset_timer"
 							onClick={this.resetTimer}
-							disabled={!(this.state.timerActive)}
+							disabled={!this.state.timerActive}
 						>
 							Reset timer
 						</button>
-						<h5>{this.state.motivationalMessage}</h5>
+					</div>
+					<h5 className="motivationalMessage is-centered">{this.state.motivationalMessage}</h5>
+					<div className="breakTime is-centered">
+						{'Break Time: ' + this.state.currentBreakMins + ':' + breakSeconds + ' mins'}
 					</div>
 				</React.StrictMode>
 			</div>
