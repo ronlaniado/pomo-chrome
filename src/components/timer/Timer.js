@@ -1,6 +1,8 @@
 /* global chrome */
 import React from 'react'
 import Bulma from 'reactbulma'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCog } from '@fortawesome/free-solid-svg-icons'
 import './timer.css'
 
 /*
@@ -34,8 +36,9 @@ export default class Timer extends React.Component {
     this.startWorkTimer = this.startWorkTimer.bind(this)
     this.startBreakTimer = this.startBreakTimer.bind(this)
     this.resetTimer = this.resetTimer.bind(this)
-	this.updateTimer = this.updateTimer.bind(this)
-	this.advanceTimer = this.advanceTimer.bind(this);
+    this.updateTimer = this.updateTimer.bind(this)
+	this.advanceTimer = this.advanceTimer.bind(this)
+	  this.openSettings = this.openSettings.bind(this);
     this.updateTime
   }
   componentDidMount () {
@@ -89,7 +92,7 @@ export default class Timer extends React.Component {
   }
   startWorkTimer () {
     const bgpage = chrome.extension.getBackgroundPage()
-    let localSec = this.state.origWorkSecs
+    let localSec = this.state.origWorkSecs + 1
     let localMin = this.state.origWorkMins
         // Because the updateTimer function has a 1 second delay, the timer will start a second behind. This code is to ensure that the timer is
     if (localSec > 0) {
@@ -99,14 +102,14 @@ export default class Timer extends React.Component {
       localSec = 59
     }
         // Starts the timer function in the background.js file, and inputs all current values as variables.
-    bgpage.startTimer(localSec, localMin, this.state.timeSeperator)
+    bgpage.startTimer(localSec, localMin, this.state.timeSeperator, 'WORK TIME')
     bgpage.isActiveTrue()
     this.updateTimer()
     this.setState({ status: 'WORK TIME', timerActive: true })
   }
   startBreakTimer () {
     const bgpage = chrome.extension.getBackgroundPage()
-    let localSec = this.state.origBreakSecs
+    let localSec = this.state.origBreakSecs + 1
     let localMin = this.state.origBreakMins
     if (localSec > 0) {
       localSec--
@@ -115,7 +118,7 @@ export default class Timer extends React.Component {
       localSec = 59
     }
         // Starts the break timer in the background
-    bgpage.startTimer(localSec, localMin, this.state.timeSeperator)
+    bgpage.startTimer(localSec, localMin, this.state.timeSeperator, 'BREAK TIME')
     bgpage.isActiveTrue()
     this.updateTimer()
     this.setState({ status: 'BREAK TIME', timerActive: true })
@@ -127,20 +130,20 @@ export default class Timer extends React.Component {
     if (bgpage.isActive()) {
       this.updateTime = setInterval(() => {
         if (bgpage.getSeconds() === 1 && bgpage.getMinutes() === 0) {
-			clearInterval(this.updateTime);
-			setTimeout(() => {
-				this.setState({
-					currentWorkMins: 0,
-					currentWorkSecs: 1
-				});
-			});
-			setTimeout(() => {
-				this.setState({ currentWorkSecs: 0 })
-			}, 1000);
-			setTimeout(() => {
-				this.advanceTimer();
-			}, 2000);
-		} else {
+          clearInterval(this.updateTime)
+          setTimeout(() => {
+            this.setState({
+              currentWorkMins: 0,
+              currentWorkSecs: 1
+            })
+          })
+          setTimeout(() => {
+            this.setState({ currentWorkSecs: 0 })
+          }, 1000)
+          setTimeout(() => {
+            this.advanceTimer()
+          }, 2000)
+        } else {
           console.log(bgpage.getMinutes() + bgpage.getTimeSeperator() + bgpage.getSeconds())
           this.setState({
             currentWorkMins: bgpage.getMinutes(),
@@ -151,42 +154,42 @@ export default class Timer extends React.Component {
       }, 1000)
     }
   }
-advanceTimer() {
-	let bgpage = chrome.extension.getBackgroundPage()
-    bgpage.clearTimer()
-    clearInterval(this.updateTime)
-    bgpage.isActiveFalse()
-	bgpage.resetGlobals()
-	if (this.state.status === 'WORK TIME') {
-		this.startBreakTimer();
-		console.log("Break timer is starting");
-	} else {
-		this.startWorkTimer();
-		console.log("Work timer is starting");
-	}
-}
-
-resetTimer() {
-	
-	console.log("Timer has been reset");
+  advanceTimer () {
     let bgpage = chrome.extension.getBackgroundPage()
     bgpage.clearTimer()
     clearInterval(this.updateTime)
     bgpage.isActiveFalse()
     bgpage.resetGlobals()
-	this.setState({
-		  timerActive: false,
-		  currentWorkMins: this.state.origWorkMins,
-		  currentWorkSecs: this.state.origWorkSecs,
-		  currentBreakMins: this.state.origBreakMins,
-		  currentBreakSecs: this.state.currentBreakSecs,
-		  timeSeperator: ':',
-		  status: ''
-	});
+    if (this.state.status === 'WORK TIME') {
+      this.startBreakTimer()
+      console.log('Break timer is starting')
+    } else {
+      this.startWorkTimer()
+      console.log('Work timer is starting')
+    }
   }
 
-render() {
-	
+  resetTimer () {
+    console.log('Timer has been reset')
+    let bgpage = chrome.extension.getBackgroundPage()
+    bgpage.clearTimer()
+    clearInterval(this.updateTime)
+    bgpage.isActiveFalse()
+    bgpage.resetGlobals()
+    this.setState({
+      timerActive: false,
+      currentWorkMins: this.state.origWorkMins,
+      currentWorkSecs: this.state.origWorkSecs,
+      currentBreakMins: this.state.origBreakMins,
+      currentBreakSecs: this.state.currentBreakSecs,
+      timeSeperator: ':',
+      status: ''
+    })
+  }
+	openSettings() {
+    window.open('/options/options.html');
+  }
+  render () {
     let workSeconds
         // Determines proper formatting for time in seconds
     if (this.state.currentWorkSecs === 60) {
@@ -205,7 +208,7 @@ render() {
       breakSeconds = this.state.currentBreakSecs
     }
     return (
-      <div className='timer'>
+		<div className='timer'>
         <React.StrictMode>
           <h2 className='is-centered'>
             <p
@@ -237,7 +240,8 @@ render() {
           <div className='breakTime is-centered'>
             {'Break Time: ' + this.state.currentBreakMins + ':' + breakSeconds + ' mins'}
           </div>
-        </React.StrictMode>
+          <FontAwesomeIcon className="settings" icon={faCog} onClick={this.openSettings} />
+			</React.StrictMode>
       </div>
     )
   }

@@ -13,3 +13,19 @@
 .is-centered {
 	text-align: center;
 }
+.settings {
+	width: 20px !important;
+    height: 20px !important;
+	margin-left: 280px;
+	margin-bottom: 3px;
+	margin-right: 3px;
+	-moz-user-select: none;
+	-webkit-user-drag: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	color: black;
+
+}
+.settings:hover {
+	color: green;
+}

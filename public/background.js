@@ -5,8 +5,16 @@ let origSec;
 let origMin;
 let timerStatus = false;
 let timer;
-
-function startTimer(sec, min, timeSeperator) {
+let timeStatus;
+function startTimer(sec, min, timeSeperator, status) {
+	//The below if statement is the reason that the timer start with one second less. This should be fixed in the future. Its purpose is to make the timer have less of a delay.
+	/*if (sec > 0) {
+		sec--;
+	} else {
+		min--;
+		sec = 59;
+	}*/
+	timerStatus = status;
 	origMin = min;
 	origSec = sec;
 	timer = setInterval(() => {
@@ -15,6 +23,7 @@ function startTimer(sec, min, timeSeperator) {
 		console.log('background.js: ' + currentMin + timeSeperator + currentSec);
 		if (currentMin === 0 && currentSec === 60) {
 			console.log('The timer will end now...');
+			notificationType(status);
 			notifyBreak();
 			sec = -1;
 			min = -1;
@@ -44,22 +53,32 @@ function startTimer(sec, min, timeSeperator) {
 }
 
 function notifyBreak() {
+}
+
+
+
+function notificationType(status) {
 	let time = /(..)(:..)/.exec(new Date()); // The prettyprinted time.
 	let hour = time[1] % 12 || 12; // The prettyprinted hour.
 	let period = time[1] < 12 ? 'a.m.' : 'p.m.'; // The period of the day.
-	new Notification(hour + time[2] + ' ' + period, {	//Uses the built-in notification's API
+	if (status === 'WORK TIME') {
+		let audio = new Audio('riff1.wav');
+		audio.play();
+		new Notification(hour + time[2] + ' ' + period, {	//Uses the built-in notification's API
 		icon: 'pomo.png',
 		body: "It's time to take a break! You did it!"
-	});
-	let audio = new Audio('timerDone.wav');
-	audio.play();
+		});
+	} else if (status === 'BREAK TIME') {
+		let audio = new Audio('riff2.wav');
+		audio.play();
+		new Notification(hour + time[2] + ' ' + period, {	//Uses the built-in notification's API
+		icon: 'pomo.png',
+		body: "Your Break is over, start working again!"
+		});	
+	}
 }
 
-/*
-------------------------------------
-Opens the options page on install
-------------------------------------
-chrome.runtime.onInstalled.addListener(function () {
+/*chrome.runtime.onInstalled.addListener(function () {
 	chrome.runtime.openOptionsPage();
 });
 */
