@@ -84,7 +84,7 @@ export default class Timer extends React.Component {
             currentBreakMins: Number(result.breakTimeMins),
             currentBreakSecs: Number(result.breakTimeSecs)
           })
-          console.log(this.state.currentBreakMins + ':' + this.state.currentBreakSecs)
+          console.log(prostheticThis.state.currentBreakMins + ':' + prostheticThis.state.currentBreakSecs)
         }
       })
       this.setState({ timerActive: false })
