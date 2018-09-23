@@ -8,12 +8,12 @@ let timer;
 let timeStatus;
 function startTimer(sec, min, timeSeperator, status) {
 	//The below if statement is the reason that the timer start with one second less. This should be fixed in the future. Its purpose is to make the timer have less of a delay.
-	/*if (sec > 0) {
+if (sec > 0) {
 		sec--;
 	} else {
 		min--;
 		sec = 59;
-	}*/
+	}
 	timerStatus = status;
 	origMin = min;
 	origSec = sec;
@@ -52,11 +52,6 @@ function startTimer(sec, min, timeSeperator, status) {
 	}, 1000);
 }
 
-function notifyBreak() {
-}
-
-
-
 function notificationType(status) {
 	let time = /(..)(:..)/.exec(new Date()); // The prettyprinted time.
 	let hour = time[1] % 12 || 12; // The prettyprinted hour.
@@ -78,10 +73,10 @@ function notificationType(status) {
 	}
 }
 
-/*chrome.runtime.onInstalled.addListener(function () {
+chrome.runtime.onInstalled.addListener(function () {
 	chrome.runtime.openOptionsPage();
 });
-*/
+
 
 function getMinutes() {
 	return currentMin;
