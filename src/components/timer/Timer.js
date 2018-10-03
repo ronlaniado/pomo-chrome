@@ -13,11 +13,13 @@ export default class Timer extends React.Component {
 		super(props);
 		this.state = {
 			status: "",
-			currentWorkMins: 0,
+			currentWorkMins: 52,
 			currentWorkSecs: 0,
-			currentBreakMins: 0,
+			currentBreakMins: 17,
 			currentBreakSecs: 0,
 			timerActive: false,
+			distance: "",
+			originalDistance: "",
 			disabled: "", // This sets the Start/Reset Timer button to be disabled when the other is enabled
 		};
 		this.workStyle = {
@@ -31,70 +33,33 @@ export default class Timer extends React.Component {
 		this.startTimer = this.startTimer.bind(this);
 		this.resetTimer = this.resetTimer.bind(this);
 		this.updateTimer = this.updateTimer.bind(this);
+		this.getSettings = this.getSettings.bind(this);
 		this.openSettings = this.openSettings.bind(this);
 		this.updateTime;
 	}
 	componentDidMount() {
 		const bgpage = chrome.extension.getBackgroundPage();
-		// ProstheticThis serves as a way to specify the meaning of `this` inside of the chrome.storage.sync function
-		const prostheticThis = this;
 		if (bgpage.isActive()) {
 			// Updates the current timer so that the popup is always up-to-date with the background script
 			console.log("The background page is currently active");
+			this.setState({
+				distance: bgpage.getDistance(),
+				status: bgpage.getStatus(),
+			});
 			this.updateTimer();
 			this.setState({ timerActive: true });
 		} else {
 			console.log("The timer is currently inactive.");
-			// Uses Chrome's Storage API to get the timer options inputting by the users
-			chrome.storage.sync.get(
-				[
-					"workTimeMins",
-					"workTimeSecs",
-					"breakTimeMins",
-					"breakTimeSecs",
-				],
-				function(result) {
-					// Checks if users put in any values. If they didn't, it uses default values.
-					if (
-						result.workTimeMins === undefined ||
-						result.workTimeSecs === undefined
-					) {
-						// Uses default values in case the options page has nothing inputted
-						console.log(result.workTimeMins);
-						prostheticThis.setState({
-							currentWorkMins: 52,
-							currentWorkSecs: 0,
-							currentBreakMins: 17,
-							currentBreakSecs: 0,
-						});
-					} else {
-						const bgpage = chrome.extension.getBackgroundPage();
-						// Gets the options that the user inputted into the state of the timer
-						prostheticThis.setState({
-							currentWorkMins: Number(result.workTimeMins),
-							currentWorkSecs: Number(result.workTimeSecs),
-							currentBreakMins: Number(result.breakTimeMins),
-							currentBreakSecs: Number(result.breakTimeSecs),
-						});
-						console.log(
-							prostheticThis.state.currentBreakMins +
-								":" +
-								prostheticThis.state.currentBreakSecs
-						);
-					}
-				}
-			);
+			this.getSettings();
 			this.setState({ timerActive: false });
 		}
 	}
 	startTimer() {
 		const bgpage = chrome.extension.getBackgroundPage();
 		// Starts the timer function in the background.js file, and inputs all current values as variables.
-		bgpage.startTimer(
+		bgpage.startWorkTimer(
 			this.state.currentWorkMins,
-			this.state.currentWorkSecs,
 			this.state.currentBreakMins,
-			this.state.currentBreakSecs,
 			"WORK TIME"
 		);
 		bgpage.isActiveTrue();
@@ -103,81 +68,69 @@ export default class Timer extends React.Component {
 	}
 
 	updateTimer() {
-		// This function refreshes the popup, and updates the display every second to display the time counted in the background script
-		const bgpage = chrome.extension.getBackgroundPage();
+		let bgpage = chrome.extension.getBackgroundPage();
 		this.updateTime = setInterval(() => {
-			if (bgpage.isActive()) {
-				if (bgpage.getStatus() === "WORK TIME") {
-					this.setState({
-						currentWorkMins: bgpage.getCurrentWorkMins(),
-						currentWorkSecs: bgpage.getCurrentWorkSecs(),
-						status: bgpage.getStatus(),
-					});
-					console.log(
-						bgpage.getCurrentWorkMins() +
-							":" +
-							bgpage.getCurrentWorkSecs() +
-							"     =>" +
-							bgpage.getStatus()
-					);
-				} else if (bgpage.getStatus() === "BREAK TIME") {
-					this.setState({
-						currentBreakMins: bgpage.getCurrentBreakMins(),
-						currentBreakSecs: bgpage.getCurrentBreakSecs(),
-						status: bgpage.getStatus(),
-					});
-					console.log(
-						bgpage.getCurrentBreakMins() +
-							":" +
-							bgpage.getCurrentBreakSecs() +
-							"     =>" +
-							bgpage.getStatus()
-					);
-				}
-			} else {
-				clearInterval(this.updateTime);
-			}
+			this.setState({
+				distance: bgpage.getDistance(),
+				status: bgpage.getStatus(),
+			});
 		}, 1000);
 	}
-
 	resetTimer() {
 		console.log("Timer has been reset");
 		let bgpage = chrome.extension.getBackgroundPage();
 		bgpage.clearTimer();
 		clearInterval(this.updateTime);
 		bgpage.isActiveFalse();
-		bgpage.resetGlobals();
-		let originals = bgpage.getOriginals();
 		this.setState({
 			timerActive: false,
-			currentWorkMins: originals.workMins,
-			currentWorkSecs: originals.workSecs,
-			currentBreakMins: originals.BreakMins,
-			currentBreakSecs: originals.BreakSecs,
 			status: "",
+			distance: this.state.originalDistance,
+		});
+		this.getSettings();
+	}
+	getSettings() {
+		// Uses Chrome's Storage API to get the timer options inputting by the users
+		const prostheticThis = this; // ProstheticThis serves as a way to specify the meaning of `this` inside of the chrome.storage.sync function
+		chrome.storage.sync.get(["workTimeMins", "breakTimeMins"], function(
+			result
+		) {
+			// Checks if users put in any values. If they didn't, it uses default values.
+			if (
+				result.workTimeMins === undefined ||
+				result.breakTimeMins === undefined
+			) {
+				// Uses default values in case the options page has nothing inputted
+				prostheticThis.setState({
+					currentWorkMins: 52,
+					currentBreakMins: 17,
+					distance: new Date(Date.now() + 52 * 61000) - Date.now(),
+				});
+			} else {
+				const bgpage = chrome.extension.getBackgroundPage();
+				// Gets the options that the user inputted into the state of the timer
+				prostheticThis.setState({
+					currentWorkMins: Number(result.workTimeMins),
+					currentBreakMins: Number(result.breakTimeMins),
+					distance:
+						new Date(Date.now() + result.workTimeMins * 61000) -
+						Date.now(),
+					originalDistance:
+						new Date(Date.now() + result.workTimeMins * 61000) -
+						Date.now(),
+				});
+				console.log(
+					prostheticThis.state.currentBreakMins +
+						":" +
+						prostheticThis.state.currentBreakSecs
+				);
+			}
 		});
 	}
 	openSettings() {
 		window.open("/options/options.html");
 	}
 	render() {
-		let workSeconds;
-		// Determines proper formatting for time in seconds
-		if (this.state.currentWorkSecs === 60) {
-			workSeconds = "00";
-		} else if (this.state.currentWorkSecs < 10) {
-			workSeconds = "0" + this.state.currentWorkSecs;
-		} else {
-			workSeconds = this.state.currentWorkSecs;
-		}
-		let breakSeconds;
-		if (this.state.currentBreakSecs === 60) {
-			breakSeconds = "00";
-		} else if (this.state.currentBreakSecs < 10) {
-			breakSeconds = "0" + this.state.currentBreakSecs;
-		} else {
-			breakSeconds = this.state.currentBreakSecs;
-		}
 		return (
 			<div className="timer">
 				<React.StrictMode>
@@ -192,11 +145,21 @@ export default class Timer extends React.Component {
 						>
 							{this.state.status}
 						</p>
-						{this.state.currentWorkMins}:
-						{chrome.extension.getBackgroundPage().getStatus() ===
-						"WORK TIMER"
-							? workSeconds
-							: breakSeconds}
+						{Math.round(
+							(this.state.distance % (1000 * 60 * 60)) /
+								(1000 * 60)
+						)}
+						:
+						{Math.round(
+							(this.state.distance % (1000 * 60)) / 1000
+						) <= 9
+							? "0" +
+							  Math.round(
+									(this.state.distance % (1000 * 60)) / 1000
+							  )
+							: Math.round(
+									(this.state.distance % (1000 * 60)) / 1000
+							  )}
 					</h2>
 					<div className="buttons is-centered is-marginless">
 						<button
@@ -215,11 +178,7 @@ export default class Timer extends React.Component {
 						</button>
 					</div>
 					<div className="breakTime is-centered">
-						{"Break Time: " +
-							this.state.currentBreakMins +
-							":" +
-							breakSeconds +
-							" mins"}
+						{"Break Time: "}
 					</div>
 					<FontAwesomeIcon
 						className="settings"
