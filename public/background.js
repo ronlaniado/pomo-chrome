@@ -19,22 +19,22 @@ function startWorkTimer(workMins, breakMins, status) {
 		if (distance <= 1000) {
 			clearInterval(timer);
 			timerStatus = "BREAK TIME";
-			notificationType(timerStatus);
+			notificationType("BREAK TIME");
 			distance = 2000;
-			startBreakTimer(origWorkMin, origBreakMin, "BREAK TIME");
+			startBreakTimer();
 		} else {
 			let timeNow = Date.now();
 			distance = workCountDown - timeNow;
 		}
 	}, 1000);
 }
-function startBreakTimer(workMins, breakMins, status) {
-	let breakCountDown = new Date(Date.now() + origBreakMin * 000); //Set to 61000 instead of 60000 to account for the loss of 1 second
+function startBreakTimer() {
+	let breakCountDown = new Date(Date.now() + origBreakMin * 60000); //Set to 61000 instead of 60000 to account for the loss of 1 second
 	timer = setInterval(() => {
 		if (distance <= 1000) {
 			clearInterval(timer);
 			timerStatus = "WORK TIME";
-			notificationType(timerStatus);
+			notificationType("WORK TIME");
 			startWorkTimer(origWorkMin, origBreakMin, "WORK TIME");
 		} else {
 			let timeNow = Date.now();
@@ -74,7 +74,7 @@ function getDistance() {
 }
 function getStatus() {
 	return timerStatus;
-
+}
 function updateOriginals(workMins, breakMins) {
 	origWorkMin = workMins;
 	origBreakMin = breakMins;
