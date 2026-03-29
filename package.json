@@ -10,7 +10,7 @@
     "bulma": "^0.7.1",
     "bulma-extensions": "^3.0.0",
     "eslint": "^4.19.1",
-    "npm": "^6.1.0",
+    "npm": "^6.14.18",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-scripts": "1.1.4",
